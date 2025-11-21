@@ -30,16 +30,27 @@ flow = Flow.from_client_secrets_file(
 def index():
     if "user" in session:
         user = session["user"]
-        ist = datetime.datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
+        ist = datetime.datetime.now(
+            pytz.timezone("Asia/Kolkata")
+        ).strftime("%Y-%m-%d %H:%M:%S")
 
         return render_template_string("""
         <h2>Hello {{name}} <a href="/logout">[Sign out]</a></h2>
         <p>You are signed in with the email <b>{{email}}</b></p>
         <p>Current Indian Time: {{time}}</p>
+
         {% if picture %}
             <img src="{{picture}}" width="120">
         {% endif %}
-        """, name=user["name"], email=user["email"], picture=user["picture"], time=ist)
+
+        <br><br>
+        <a href="/design">Go to Pattern Printing</a>
+        """,
+        name=user["name"],
+        email=user["email"],
+        picture=user["picture"],
+        time=ist
+        )
 
     return '''
         <a href="/login">
@@ -80,6 +91,65 @@ def callback():
 def logout():
     session.clear()
     return redirect("/")
+
+def generate_design(n):
+    word = "SOLUTIONSFORMULAQ"
+    length = len(word)
+    result = []
+
+    for i in range(n):
+        left = word[i % length]
+        right = word[(i + n - 1) % length]
+
+        if i == 0 or i == n - 1:
+            result.append(left)
+        else:
+            dashes = "-" * (i - 1)
+            if left == right:
+                result.append(left + dashes)
+            else:
+                result.append(left + dashes + right)
+
+    return result
+
+@app.route("/design", methods=["GET", "POST"])
+def design():
+    if "user" not in session:
+        return redirect("/")
+
+    output = None
+
+    if request.method == "POST":
+        try:
+            lines = int(request.form.get("lines"))
+            if 1 <= lines <= 100:
+                output = generate_design(lines)
+            else:
+                output = ["Please enter a number between 1 and 100"]
+        except:
+            output = ["Invalid input"]
+
+    html = """
+    <h2>Pattern Printing</h2>
+
+    <form method="POST">
+        <label>Number of Lines (max 100):</label>
+        <input type="number" name="lines" max="100" required>
+        <button type="submit">Display</button>
+    </form>
+
+    {% if output %}
+    <h3>Output:</h3>
+    <pre style="font-family: monospace; font-size: 16px; line-height: 18px;">
+    {% for line in output %}
+    {{ line }}
+    {% endfor %}
+        </pre>
+    {% endif %}
+        <br><a href="/">Back</a>
+        """
+
+    return render_template_string(html, output=output)
 
 if __name__ == "__main__":
     app.run(debug=True)
