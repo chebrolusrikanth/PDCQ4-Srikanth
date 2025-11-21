@@ -59,3 +59,7 @@ Add authorized redirect URI:http://localhost:5000/callback
 
 ### 4️⃣ Run the Flask App
 python app.py
+
+#### Output Images
+
+![alt text](<OutputImages/Srikanth-PDC_Day1-Screenshot 3.png>) ![alt text](<OutputImages/Srikanth-PDC_Day1-Screenshot 2.png>) ![alt text](<OutputImages/Srikanth-PDC_Day1-Screenshot 1.png>)
